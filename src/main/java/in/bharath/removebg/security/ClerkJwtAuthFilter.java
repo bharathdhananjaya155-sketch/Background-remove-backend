@@ -63,10 +63,17 @@ public class ClerkJwtAuthFilter extends OncePerRequestFilter {
             Claims claims = Jwts.parserBuilder()
                     .setSigningKey(publicKey)
                     .setAllowedClockSkewSeconds(60) //allow 60 seconds
-                    .requireIssuer(clerkIssuer)
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
+
+            System.out.println("Token issuer: " + claims.getIssuer());
+            System.out.println("Expected issuer: " + clerkIssuer);
+
+            if (!claims.getIssuer().equals(clerkIssuer)) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Issuer mismatch");
+                return;
+            }
 
             String clerkUserId = claims.getSubject();
 
